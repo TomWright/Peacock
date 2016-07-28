@@ -294,12 +294,25 @@ class View
     public function mergeChildSections(View $childLayout)
     {
         $childSections = $childLayout->getSections();
+
+        $appendToSectionsArray = $childLayout->getParameter('append-to-sections', []);
+        $appendToSections = [];
+        foreach ($appendToSectionsArray as $appendToSectionsArrayStr) {
+            $exploded = explode('->', $appendToSectionsArrayStr);
+            if (count($exploded) === 2) {
+                $appendToSections[$exploded[0]] = $exploded[1];
+            }
+        }
+
         foreach ($childSections as $sectionName => $sectionData) {
             if ($childLayout->shouldOverwriteSection($sectionName)) {
                 $this->appendParameter('overwrite-section', $sectionName);
                 $this->initSection($sectionName, true);
             }
             foreach ($sectionData as $data) {
+                if (array_key_exists($sectionName, $appendToSections)) {
+                    $sectionName = $appendToSections[$sectionName];
+                }
                 $this->appendToSection($sectionName, $data);
             }
         }
@@ -422,6 +435,7 @@ class View
         switch ($name) {
             case 'overwrite-sections':
             case 'do-not-overwrite-sections':
+            case 'append-to-sections':
                 if (is_string($val)) {
                     $val = explode("\n", $val);
                 } elseif (! is_array($val)) {
@@ -458,6 +472,7 @@ class View
         switch ($name) {
             case 'overwrite-sections':
             case 'do-not-overwrite-sections':
+            case 'append-to-sections':
                 if (is_string($appendVal)) {
                     $appendVal = explode("\n", $appendVal);
                 }
