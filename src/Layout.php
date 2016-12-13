@@ -50,6 +50,12 @@ class Layout extends View
             }
         }
 
+        foreach ($this->sections as $key => $val) {
+            foreach ($val as $k => $v) {
+                $this->sections[$key][$k] = $this->renderSections($v);
+            }
+        }
+
         $parentLayout->mergeChildSections($this);
 
         return $this;

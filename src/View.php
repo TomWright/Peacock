@@ -83,6 +83,20 @@ class View
     }
 
 
+    protected function renderSections($content)
+    {
+        $pattern = '|(?:\{RENDER_SECTION\:(.+?)\})|s';
+        return preg_replace_callback($pattern, function ($matches) {
+            list(, $sectionName) = $matches;
+            $result = '';
+            if (array_key_exists($sectionName, $this->sections)) {
+                $result .= implode('', $this->sections[$sectionName]);
+            }
+            return $result;
+        }, $content);
+    }
+
+
     /**
      * @return mixed|string
      */
@@ -96,13 +110,12 @@ class View
 
         $pattern = '|(?:\{SECTION\:(.+?)\})(.*?)(?:\{END_SECTION\})|s';
         $content = preg_replace_callback($pattern, function ($matches) {
-            list(, $sectionName, ) = $matches;
-            $result = '';
-            if (array_key_exists($sectionName, $this->sections)) {
-                $result .= implode('', $this->sections[$sectionName]);
-            }
-            return $result;
+            list(, $sectionName, $sectionContent) = $matches;
+            $sectionContent = $this->renderSections($sectionContent);
+            $this->prependToSection($sectionName, $sectionContent);
         }, $content);
+
+        $content = $this->renderSections($content);
 
         return $content;
     }
