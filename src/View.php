@@ -348,6 +348,9 @@ class View
     public function setData(array $data)
     {
         $this->data = array_merge($this->data, $data);
+        foreach ($this->childLayouts as $layout) {
+            $layout->setData($data);
+        }
         return $this;
     }
 
